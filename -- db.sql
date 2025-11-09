@@ -1,6 +1,6 @@
 -- Create Database
-CREATE DATABASE IF NOT EXISTS costmate CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE costmate;
+-- CREATE DATABASE IF NOT EXISTS costmate CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE u928163871_costmate;
 
 -- ========================
 -- 1️⃣ Shops Table
