@@ -10,13 +10,13 @@
 
     <div class="collapse navbar-collapse" id="cmNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="/costmate/pages/dashboard.php">Dashboard</a></li>
-        <!-- <li class="nav-item"><a class="nav-link" href="/costmate/pages/add_shop.php">Add Shop</a></li>
-        <li class="nav-item"><a class="nav-link" href="/costmate/pages/add_category.php">Add Category</a></li>
-        <li class="nav-item"><a class="nav-link" href="/costmate/pages/add_subcategory.php">Add Subcategory</a></li> -->
-        <li class="nav-item"><a class="nav-link" href="/costmate/pages/add_purchase.php">Add Purchase</a></li>
-        <li class="nav-item"><a class="nav-link" href="/costmate/pages/purchase_list.php">Purchase List</a></li>
-        <li class="nav-item"><a class="nav-link" href="/costmate/pages/reports.php">Reports</a></li>
+        <li class="nav-item"><a class="nav-link" href="/pages/dashboard.php">Dashboard</a></li>
+        <!-- <li class="nav-item"><a class="nav-link" href="/pages/add_shop.php">Add Shop</a></li>
+        <li class="nav-item"><a class="nav-link" href="/pages/add_category.php">Add Category</a></li>
+        <li class="nav-item"><a class="nav-link" href="/pages/add_subcategory.php">Add Subcategory</a></li> -->
+        <li class="nav-item"><a class="nav-link" href="/pages/add_purchase.php">Add Purchase</a></li>
+        <li class="nav-item"><a class="nav-link" href="/pages/purchase_list.php">Purchase List</a></li>
+        <li class="nav-item"><a class="nav-link" href="/pages/reports.php">Reports</a></li>
       </ul>
 
       <ul class="navbar-nav ms-auto">
@@ -26,13 +26,13 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="toolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Tools</a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="toolsDropdown">
-            <li><a class="dropdown-item" href="/costmate/pages/add_shop.php">Manage Shops</a></li>
-            <li><a class="dropdown-item" href="/costmate/pages/add_category.php">Manage Categories</a></li>
-            <li><a class="dropdown-item" href="/costmate/pages/add_subcategory.php">Manage Subcategories</a></li>
+            <li><a class="dropdown-item" href="/pages/add_shop.php">Manage Shops</a></li>
+            <li><a class="dropdown-item" href="/pages/add_category.php">Manage Categories</a></li>
+            <li><a class="dropdown-item" href="/pages/add_subcategory.php">Manage Subcategories</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="/costmate/pages/add_purchase.php">Add Purchase</a></li>
-            <li><a class="dropdown-item" href="/costmate/pages/purchase_list.php">Purchase List</a></li>
-            <li><a class="dropdown-item" href="/costmate/pages/reports.php">Reports</a></li>
+            <li><a class="dropdown-item" href="/pages/add_purchase.php">Add Purchase</a></li>
+            <li><a class="dropdown-item" href="/pages/purchase_list.php">Purchase List</a></li>
+            <li><a class="dropdown-item" href="/pages/reports.php">Reports</a></li>
           </ul>
         </li>
       </ul>
