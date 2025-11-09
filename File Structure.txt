@@ -1,0 +1,27 @@
+file structure hobe amon: 
+htdocs/
+└── costmate/
+    ├── config/
+    │   └── db.php
+    │
+    ├── includes/
+    │   ├── header.php
+    │   ├── footer.php
+    │   └── navbar.php
+    │
+    ├── pages/
+    │   ├── dashboard.php
+    │   ├── add_shop.php
+    │   ├── add_category.php
+    │   ├── add_subcategory.php
+    │   ├── add_purchase.php
+    │   └── reports.php
+    │
+    ├── assets/
+    │   ├── css/
+    │   │   └── style.css
+    │   └── js/
+    │       └── script.js
+    │
+    ├── index.php
+    └── README.txt
