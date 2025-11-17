@@ -1,7 +1,5 @@
 <?php
-include '../config/db.php';
-include '../includes/header.php';
-include '../includes/navbar.php';
+include 'includes/header.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $name = $_POST['name'];
@@ -34,4 +32,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   </form>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php include 'includes/footer.php'; ?>

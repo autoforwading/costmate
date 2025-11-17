@@ -1,24 +1,12 @@
 <?php
 // pages/add_purchase.php
-require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../includes/header.php';
-require_once __DIR__ . '/../includes/navbar.php';
-
-// Handle adding a new payment method inline (so you don't need a separate page)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_method') {
-    $mname = trim($_POST['method_name']);
-    if ($mname !== '') {
-        $stmt = $conn->prepare("INSERT INTO payment_methods (name) VALUES (?)");
-        $stmt->bind_param('s', $mname);
-        $stmt->execute();
-        $stmt->close();
-        echo "<div class='container'><div class='alert alert-success'>Payment method added.</div></div>";
-    }
-}
+require_once __DIR__ . '/includes/header.php';
 
 // Handle purchase save
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_purchase') {
     // collect and sanitize
+    $paid_amount = 0.00; // default to zero if not provided
+
     $shop_id = !empty($_POST['shop_id']) ? (int)$_POST['shop_id'] : null;
     $category_id = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
     $subcategory_id = !empty($_POST['subcategory_id']) ? (int)$_POST['subcategory_id'] : null;
@@ -32,8 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $purchase_date = !empty($_POST['purchase_date']) ? $_POST['purchase_date'] : date('Y-m-d');
 
     // insert with prepared statement
-    $stmt = $conn->prepare("INSERT INTO purchases (shop_id, category_id, subcategory_id, description, quantity, unit_price, total_price, paid_amount, payment_method_id, payment_desc, purchase_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param('iiisiddisss', $shop_id, $category_id, $subcategory_id, $description, $quantity, $unit_price, $total_price, $paid_amount, $payment_method_id, $payment_desc, $purchase_date);
+    // $stmt = $conn->prepare("INSERT INTO purchases (shop_id, category_id, subcategory_id, description, quantity, unit_price, total_price, payment_method_id, payment_desc, purchase_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    // $stmt->bind_param('iiisiddisss', $shop_id, $category_id, $subcategory_id, $description, $quantity, $unit_price, $total_price, $payment_method_id, $payment_desc, $purchase_date);
+    $stmt = $conn->prepare("INSERT INTO purchases (shop_id, category_id, subcategory_id, description, quantity, unit_price, total_price, payment_method_id, payment_desc, purchase_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param('iiisiddiss', $shop_id, $category_id, $subcategory_id, $description, $quantity, $unit_price, $total_price, $payment_method_id, $payment_desc, $purchase_date);
+
     $ok = $stmt->execute();
     if ($ok) {
         echo "<div class='container'><div class='alert alert-success'>Purchase saved successfully.</div></div>";
@@ -114,16 +105,21 @@ $methods = $conn->query("SELECT id, name FROM payment_methods ORDER BY name");
         </div>
 
         <div class="col-md-3">
-          <label class="form-label">Paid Amount</label>
-          <input type="number" name="paid_amount" id="paid_amount" class="form-control" step="0.01" value="0.00" required>
+          <label class="form-label">Purchase Date</label>
+          <input type="date" name="purchase_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
         </div>
+
+        <!-- <div class="col-md-3">
+          <label class="form-label">Paid Amount</label>
+          <input type="number" name="paid_amount" id="paid_amount" class="form-control" step="0.01" value="0.00" >
+        </div> -->
       </div>
 
-      <div class="row g-3 mt-3">
+      <!-- <div class="row g-3 mt-3">
         <div class="col-md-6">
           <label class="form-label">Payment Method</label>
           <div class="input-group">
-            <select name="payment_method_id" id="payment_method_id" class="form-select" required>
+            <select name="payment_method_id" id="payment_method_id" class="form-select">
               <option value="">-- Select Method --</option>
               <?php
               // reset pointer if needed by re-querying:
@@ -142,33 +138,17 @@ $methods = $conn->query("SELECT id, name FROM payment_methods ORDER BY name");
           <label class="form-label">Payment Description</label>
           <input type="text" name="payment_desc" id="payment_desc" class="form-control">
         </div>
-      </div>
+      </div> -->
 
-      <div class="row g-3 mt-3">
+      <!-- <div class="row g-3 mt-3">
         <div class="col-md-4">
           <label class="form-label">Purchase Date</label>
           <input type="date" name="purchase_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
         </div>
-      </div>
+      </div> -->
 
       <div class="mt-3">
         <button class="btn btn-primary">Save Purchase</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Inline Add Payment Method Modal (simple) -->
-  <div class="card p-3">
-    <h6>Add Payment Method (quick)</h6>
-    <form method="post" id="addMethodForm">
-      <input type="hidden" name="action" value="add_method">
-      <div class="row g-2 align-items-center">
-        <div class="col-md-8">
-          <input type="text" name="method_name" id="method_name" placeholder="e.g., bKash / Nagad / DBBL" class="form-control" required>
-        </div>
-        <div class="col-md-4">
-          <button class="btn btn-outline-success" type="submit">Add Method</button>
-        </div>
       </div>
     </form>
   </div>
@@ -191,28 +171,6 @@ $methods = $conn->query("SELECT id, name FROM payment_methods ORDER BY name");
   unit.addEventListener('input', calc);
   calc();
 
-  // quick add method form: on submit, POST and reload page to show new method
-  const addMethodForm = document.getElementById('addMethodForm');
-  addMethodForm.addEventListener('submit', function(e){
-    // allow normal submit (server handles and shows success), then redirect back to ensure dropdown updated
-    // but to avoid losing user input, do an AJAX submit and then append new option to select
-    e.preventDefault();
-    const name = document.getElementById('method_name').value.trim();
-    if(!name){ alert('Enter method name'); return; }
-
-    // AJAX POST
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onreadystatechange = function(){
-      if(xhr.readyState===4 && xhr.status===200){
-        // try to parse response; simply reload page to update dropdown
-        location.reload();
-      }
-    };
-    xhr.send('action=add_method&method_name=' + encodeURIComponent(name));
-  });
-
   // optional: filter subcategories based on selected category (client-side)
   const catSel = document.getElementById('category_select');
   const subSel = document.getElementById('subcategory_select');
@@ -229,5 +187,5 @@ $methods = $conn->query("SELECT id, name FROM payment_methods ORDER BY name");
 </script>
 
 <?php
-require_once __DIR__ . '/../includes/footer.php';
+require_once __DIR__ . '/includes/footer.php';
 ?>

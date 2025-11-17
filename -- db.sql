@@ -55,10 +55,8 @@ CREATE TABLE `purchases` (
   `quantity` INT(11) DEFAULT 1,
   `unit_price` DECIMAL(12,2) DEFAULT 0.00,
   `total_price` DECIMAL(12,2) NOT NULL,
-  `paid_amount` DECIMAL(12,2) NOT NULL,
   `payment_method_id` INT(11) DEFAULT NULL,
   `payment_desc` TEXT DEFAULT NULL,
-  `balance` DECIMAL(12,2) GENERATED ALWAYS AS (`total_price` - `paid_amount`) STORED,
   `purchase_date` DATE NOT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -77,7 +75,7 @@ CREATE TABLE `purchases` (
 -- 6️⃣ Optional: Default Payment Methods
 -- ========================
 INSERT INTO `payment_methods` (`name`) VALUES
-('Cash'), ('Bkash'), ('Nagad'), ('Bank Transfer');
+('Cash'), ('Bkash'), ('Nagad'), ('Bank Transfer'), ('Chceck');
 
 -- ========================
 -- ✅ All Tables Ready

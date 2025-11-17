@@ -1,0 +1,4 @@
+Update 1 on 17.11.2025
+* Changed file structures.
+* Fiexed Dashboard, Add Purchase, Payment
+* Updated sql

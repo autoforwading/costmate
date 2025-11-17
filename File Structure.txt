@@ -9,14 +9,6 @@ htdocs/
     │   ├── footer.php
     │   └── navbar.php
     │
-    ├── pages/
-    │   ├── dashboard.php
-    │   ├── add_shop.php
-    │   ├── add_category.php
-    │   ├── add_subcategory.php
-    │   ├── add_purchase.php
-    │   └── reports.php
-    │
     ├── assets/
     │   ├── css/
     │   │   └── style.css
@@ -24,4 +16,8 @@ htdocs/
     │       └── script.js
     │
     ├── index.php
-    └── README.txt
+    └── add_shop.php
+    └── add_category.php
+    └── add_subcategory.php
+    └── add_purchase.php
+    └── reports.php

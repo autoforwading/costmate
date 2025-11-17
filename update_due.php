@@ -1,7 +1,5 @@
 <?php
-include '../config/db.php';
-include '../includes/header.php';
-include '../includes/navbar.php';
+include 'includes/header.php';
 
 $message = '';
 $alertClass = '';
@@ -49,4 +47,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['purchase_id'], $_POST
     $message = '';
 }
 ?>
-<?php include '../includes/footer.php'; ?>
+<?php include 'includes/footer.php'; ?>

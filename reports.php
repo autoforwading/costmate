@@ -1,8 +1,6 @@
 <?php
 // pages/reports.php
-require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../includes/header.php';
-require_once __DIR__ . '/../includes/navbar.php';
+require_once __DIR__ . '/includes/header.php';
 ?>
 
 <div class="container">
@@ -124,5 +122,5 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 <?php
-require_once __DIR__ . '/../includes/footer.php';
+require_once __DIR__ . '/includes/footer.php';
 ?>
