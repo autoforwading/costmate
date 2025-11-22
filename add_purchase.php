@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // fetch dropdown data
 $shops = $conn->query("SELECT id, name FROM shops ORDER BY name");
-$categories = $conn->query("SELECT id, name FROM categories ORDER BY name");
+$categories = $conn->query("SELECT id, name, shopid FROM categories ORDER BY name");
 $subcategories = $conn->query("SELECT id, name, category_id FROM subcategories ORDER BY name");
 $methods = $conn->query("SELECT id, name FROM payment_methods ORDER BY name");
 ?>
@@ -51,7 +51,7 @@ $methods = $conn->query("SELECT id, name FROM payment_methods ORDER BY name");
       <div class="row g-3">
         <div class="col-md-4">
           <label class="form-label">Shop</label>
-          <select name="shop_id" class="form-select" required>
+          <select name="shop_id" id="shop_select" class="form-select" required>
             <option value="">-- Select Shop --</option>
             <?php while ($r = $shops->fetch_assoc()): ?>
               <option value="<?= $r['id'] ?>"><?= htmlspecialchars($r['name']) ?></option>
@@ -64,7 +64,7 @@ $methods = $conn->query("SELECT id, name FROM payment_methods ORDER BY name");
           <select name="category_id" id="category_select" class="form-select" required>
             <option value="">-- Select Category --</option>
             <?php while ($r = $categories->fetch_assoc()): ?>
-              <option value="<?= $r['id'] ?>"><?= htmlspecialchars($r['name']) ?></option>
+              <option value="<?= $r['id'] ?>" data-cat="<?= $r['shopid'] ?>"><?= htmlspecialchars($r['name']) ?></option>
             <?php endwhile; ?>
           </select>
         </div>
