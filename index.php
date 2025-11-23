@@ -47,26 +47,33 @@ $totalShops = $conn->query("SELECT COUNT(*) AS total FROM shops")->fetch_assoc()
         <tr>
           <th>#</th>
           <th>Shop</th>
-          <th>Category</th>
-          <th>Subcategory</th>
+          <th>Product</th>
+          <th>Description</th>
+          <th>Unit Price</th>
           <th>Total Price</th>
-          <th>Paid Amount</th>
-          <th>Due</th>
           <th>Purchase Date</th>
-          <th>Action</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <?php
-        $sql = "SELECT p.id, s.name AS shop_name, c.name AS category_name, sc.name AS subcategory_name,
-                       p.quantity, p.unit_price, p.total_price, p.paid_amount, p.balance,
-                       pm.name AS payment_method, p.payment_desc, p.purchase_date, p.description
-                FROM purchases p
-                LEFT JOIN shops s ON p.shop_id = s.id
-                LEFT JOIN categories c ON p.category_id = c.id
-                LEFT JOIN subcategories sc ON p.subcategory_id = sc.id
-                LEFT JOIN payment_methods pm ON p.payment_method_id = pm.id
-                ORDER BY p.id DESC";
+        $sql = "SELECT 
+                p.id,
+                s.name AS shop_name,
+                sc.name AS product_name,
+                c.name AS category_name,
+                p.unit_price,
+                p.total_price,
+                p.quantity,
+                p.description,
+                pm.name AS payment_method,
+                p.purchase_date
+            FROM purchases p
+            LEFT JOIN shops s ON p.shop_id = s.id
+            LEFT JOIN categories c ON p.category_id = c.id
+            LEFT JOIN subcategories sc ON p.subcategory_id = sc.id
+            LEFT JOIN payment_methods pm ON p.payment_method_id = pm.id
+            ORDER BY p.id DESC";
         $result = $conn->query($sql);
 
         if ($result && $result->num_rows > 0) {
@@ -76,10 +83,9 @@ $totalShops = $conn->query("SELECT COUNT(*) AS total FROM shops")->fetch_assoc()
                         <td>{$i}</td>
                         <td>{$row['shop_name']}</td>
                         <td>{$row['category_name']}</td>
-                        <td>{$row['subcategory_name']}</td>
+                        <td>{$row['description']}</td>
+                        <td>৳{$row['unit_price']}</td>
                         <td>৳{$row['total_price']}</td>
-                        <td>৳{$row['paid_amount']}</td>
-                        <td>৳{$row['balance']}</td>
                         <td>{$row['purchase_date']}</td>
                         <td>
                           <button class='btn btn-sm btn-primary' 
@@ -102,14 +108,14 @@ $totalShops = $conn->query("SELECT COUNT(*) AS total FROM shops")->fetch_assoc()
                       <div class='modal-body'>
                         <p><strong>Shop:</strong> {$row['shop_name']}</p>
                         <p><strong>Category:</strong> {$row['category_name']}</p>
-                        <p><strong>Subcategory:</strong> {$row['subcategory_name']}</p>
+                        <p><strong>Subcategory:</strong> {$row['product_name']}</p>
                         <p><strong>Quantity:</strong> {$row['quantity']}</p>
                         <p><strong>Unit Price:</strong> ৳{$row['unit_price']}</p>
                         <p><strong>Total Price:</strong> ৳{$row['total_price']}</p>
-                        <p><strong>Paid Amount:</strong> ৳{$row['paid_amount']}</p>
-                        <p><strong>Due:</strong> ৳{$row['balance']}</p>
-                        <p><strong>Payment Method:</strong> {$row['payment_method']}</p>
-                        <p><strong>Payment Description:</strong> {$row['payment_desc']}</p>
+                        <!--p><strong>Paid Amount:</strong> ৳ </p-->
+                        <!--p><strong>Due:</strong> ৳ </p-->
+                        <!--p><strong>Payment Method:</strong>  </p-->
+                        <!--p><strong>Payment Description:</strong> </p-->
                         <p><strong>Purchase Date:</strong> {$row['purchase_date']}</p>
                         <p><strong>Description:</strong> {$row['description']}</p>
                       </div>

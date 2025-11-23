@@ -2,3 +2,16 @@ Update 1 on 17.11.2025
 * Changed file structures.
 * Fiexed Dashboard, Add Purchase, Payment
 * Updated sql
+
+Update on 22.11.2025
+* Added Edit / Delete options on shop
+* Added Edit / Delete options on categories
+  |- Added column "shopid" (int) on table "categories"
+* Added Shop based category options
+* Added Edit / Delete on subcategories.
+* Added Category based Subcategory
+
+Update on 23.11.2025
+* Edit Category Form update, Input default value "shop" dewa selo number er jaygay. {add_category.php} [Bug fix]
+* Dashboard Purchase record active {index.php}
+* Payment Edit/Delete option added {payment.php}

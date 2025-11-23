@@ -16,24 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 $alertMessage = '';
 $alertClass = '';
 
-// --- Handle form submission for payment ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_method'], $_POST['pay_date'], $_POST['shop_id'])) {
+// --- Handle form submission for AddPayment ---
+if (isset($_POST['addPayment']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_method'], $_POST['pay_date'], $_POST['shop_id'])) {
     $shop_id = intval($_POST['shop_id']);
     $method_id = intval($_POST['pay_method']);
     $desc = trim($_POST['pay_description'] ?? '');
     $pay_date = $_POST['pay_date'];
     $amount = floatval($_POST['amount']);
-
-    // --- Get method name from payment_methods table ---
-    $method_name = '';
-    $methodStmt = $conn->prepare("SELECT name FROM payment_methods WHERE id = ?");
-    if ($methodStmt) {
-        $methodStmt->bind_param("i", $method_id);
-        $methodStmt->execute();
-        $methodStmt->bind_result($method_name);
-        $methodStmt->fetch();
-        $methodStmt->close();
-    }
 
     if ($amount <= 0) {
         $alertMessage = "Invalid payment amount.";
@@ -41,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_method'], $_POST[
     } else {
         $stmt = $conn->prepare("INSERT INTO payment_records (shop_id, amount, method, description, date) VALUES (?, ?, ?, ?, ?)");
         if ($stmt) {
-            $stmt->bind_param("idsss", $shop_id, $amount, $method_name, $desc, $pay_date);
+            $stmt->bind_param("idiss", $shop_id, $amount, $method_id, $desc, $pay_date);
             if ($stmt->execute()) {
                 $alertMessage = "Payment recorded successfully!";
                 $alertClass = "alert-success";
@@ -54,6 +43,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_method'], $_POST[
             $alertMessage = "Database error: " . $conn->error;
             $alertClass = "alert-danger";
         }
+    }
+}
+
+// --- Handle form submission for EditPayment ---
+if (isset($_POST['editPayment']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_id'], $_POST['pay_method'], $_POST['date'])) {
+    $payment_id = intval($_POST['payment_id']);
+    $method_id = intval($_POST['pay_method']);
+    $desc = trim($_POST['description'] ?? '');
+    $pay_date = $_POST['date'];
+    $amount = floatval($_POST['amount']);
+
+    if ($amount <= 0) {
+        $alertMessage = "Invalid payment amount.";
+        $alertClass = "alert-warning";
+    } else {
+        $stmt = $conn->prepare("UPDATE payment_records SET amount = ?, method = ?, description = ?, date = ? WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param("idssi", $amount, $method_id, $desc, $pay_date, $payment_id);
+            if ($stmt->execute()) {
+                $alertMessage = "Payment updated successfully!";
+                $alertClass = "alert-success";
+            } else {
+                $alertMessage = "Error updating payment record.";
+                $alertClass = "alert-danger";
+            }
+            $stmt->close();
+        } else {
+            $alertMessage = "Database error: " . $conn->error;
+            $alertClass = "alert-danger";
+        }
+    }
+}
+// --- Handle deletion of payment record ---
+if (isset($_GET['delPayment'])) {
+    $payment_id = intval($_GET['delPayment']);
+    $stmt = $conn->prepare("DELETE FROM payment_records WHERE id = ?");
+    if ($stmt) {
+        $stmt->bind_param("i", $payment_id);
+        if ($stmt->execute()) {
+            $alertMessage = "Payment record deleted successfully.";
+            header("Location: payment.php?shop_id=" . (isset($_GET['shop_id']) ? intval($_GET['shop_id']) : '0'));
+            $alertClass = "alert-success";
+        } else {
+            $alertMessage = "Error deleting payment record.";
+            $alertClass = "alert-danger";
+        }
+        $stmt->close();
+    } else {
+        $alertMessage = "Database error: " . $conn->error;
+        $alertClass = "alert-danger";
     }
 }
 
@@ -102,7 +141,12 @@ if ($view_shop_id > 0) {
     $purchases = $stmt->get_result();
 
     // Payment records list
-    $stmt = $conn->prepare("SELECT * FROM payment_records WHERE shop_id = ? ORDER BY date DESC, id DESC");
+    $stmt = $conn->prepare("SELECT pr.*, pm.name AS method_name
+        FROM payment_records pr
+        LEFT JOIN payment_methods pm ON pr.method = pm.id
+        WHERE pr.shop_id = ?
+        ORDER BY pr.date DESC, pr.id DESC");
+
     $stmt->bind_param("i", $view_shop_id);
     $stmt->execute();
     $payments = $stmt->get_result();
@@ -241,6 +285,7 @@ $methods = $conn->query("SELECT id, name FROM payment_methods ORDER BY name ASC"
                             <th>Description</th>
                             <th>Date</th>
                             <th>Created At</th>
+                            <th colspan="2">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -250,24 +295,40 @@ $methods = $conn->query("SELECT id, name FROM payment_methods ORDER BY name ASC"
                             $i = 1;
                             while ($row = $payments->fetch_assoc()):
                                 $total_payment_sum += $row['amount'];
+                                $id = $row['id'];
                         ?>
                             <tr>
                                 <td><?= $i++; ?></td>
                                 <td><?= number_format($row['amount'], 2); ?></td>
-                                <td><?= htmlspecialchars($row['method'] ?: '—'); ?></td>
+                                <td><?= htmlspecialchars($row['method_name'] ?: '—'); ?></td>
                                 <td><?= htmlspecialchars($row['description'] ?: '—'); ?></td>
                                 <td><?= htmlspecialchars($row['date']); ?></td>
                                 <td><?= htmlspecialchars($row['created_at']); ?></td>
+                                <?php
+                                // For future: Edit/Delete actions can be added here
+                                echo"
+                                <td style=\"text-align: center;\">
+                                    <button class=\"btn btn-sm btn-primary\" data-toggle=\"modal\" data-target=\"#editPayment{$id}\">Edit</button>
+                                </td>
+                                <td style=\"text-align: center;\"> 
+                                    <a href=\"payment.php?shop_id=$view_shop_id&delPayment=$id\" 
+                                    class=\"btn btn-sm btn-danger\" 
+                                    onclick=\"return confirm('Please confirm deletion');\"> 
+                                    Delete 
+                                    </a> 
+                                </td>
+                                ";
+                                ?>
                             </tr>
                         <?php endwhile;
                         else:
-                            echo '<tr><td colspan="6">No payment records found.</td></tr>';
+                            echo '<tr><td colspan="8">No payment records found.</td></tr>';
                         endif;
                         ?>
                     </tbody>
                     <tfoot class="fw-bold">
                         <tr>
-                            <td colspan="5" class="text-end">Total Payments:</td>
+                            <td colspan="7" class="text-end">Total Payments:</td>
                             <td>৳<?= number_format($total_payment_sum, 2); ?></td>
                         </tr>
                     </tfoot>
@@ -279,7 +340,7 @@ $methods = $conn->query("SELECT id, name FROM payment_methods ORDER BY name ASC"
         <div class="modal fade" id="payModal" tabindex="-1" aria-labelledby="payModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
-              <form method="POST">
+              <form method="POST" action="payment.php?shop_id=<?= urlencode($view_shop_id) ?>">
                 <input type="hidden" name="shop_id" value="<?= $view_shop_id ?>">
                 <div class="modal-header">
                   <h5 class="modal-title">Add Payment</h5>
@@ -313,14 +374,94 @@ $methods = $conn->query("SELECT id, name FROM payment_methods ORDER BY name ASC"
                   </div>
                 </div>
                 <div class="modal-footer">
-                  <button class="btn btn-success" type="submit">Confirm Payment</button>
+                  <button class="btn btn-success" type="submit" name="addPayment">Confirm Payment</button>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
               </form>
             </div>
           </div>
         </div>
+
+
+
+        <?php 
+        $shop_id = $_GET['shop_id'];
+        $run = mysqli_query($conn, "
+            SELECT pr.*, pm.name AS method_name
+            FROM payment_records pr
+            LEFT JOIN payment_methods pm ON pr.method = pm.id
+            WHERE pr.shop_id = $shop_id
+        ");
+        // $run = mysqli_query($conn, "SELECT * FROM payment_records WHERE shop_id = $shop_id");
+
+        while ($row = mysqli_fetch_assoc($run)) {
+            $id = $row['id'];
+            $amount = $row['amount'];
+            $method = $row['method'];
+            $method_name = $row['method_name'];
+            $description = $row['description'];
+            $date = $row['date'];
+            echo "
+            <!-- edit payment modal -->
+            <!-- Modal -->
+            <div class=\"modal fade\" id=\"editPayment{$id}\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-hidden=\"true\">
+            <div class=\"modal-dialog\" role=\"document\">
+                <div class=\"modal-content\">
+                <div class=\"modal-header\">
+                    <h5 class=\"modal-title\" id=\"exampleModalLabel\">Edit Payment</h5>
+                    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">
+                    <span aria-hidden=\"true\">&times;</span>
+                    </button>
+                </div>
+                <div class=\"modal-body\">
+                    <form method=\"POST\" action=\"payment.php?shop_id=$view_shop_id\">
+                    <input type=\"hidden\" name=\"payment_id\" value=\"{$id}\">
+                    <div class=\"mb-3\">
+                        <label class=\"form-label\">Amount</label>
+                        <input type=\"number\" name=\"amount\" value=\"{$amount}\" step=\"0.01\" class=\"form-control\" required>
+                    </div>
+                    <div class=\"mb-3\">
+                        <label class=\"form-label\">Payment Method</label>
+                        <select name=\"pay_method\" class=\"form-select\" required>
+                        <option value=\"$method\">$method_name</option>";
+                        
+                        $runpay = mysqli_query($conn, "SELECT * FROM payment_methods");
+                        while ($row = mysqli_fetch_assoc($runpay)) {
+                            if ($row['id'] == $method) continue;
+                            echo "<option value='{$row['id']}'>" . htmlspecialchars($row['name']) . "</option>";
+                        }
+                        echo "
+                        </select>
+                    </div>
+                    <div class=\"mb-3\">
+                        <label class=\"form-label\">Description</label>
+                        <textarea name=\"description\" class=\"form-control\">{$description}</textarea>
+                    </div>
+                    <div class=\"mb-3\">
+                        <label class=\"form-label\">Date</label>
+                        <input type=\"date\" name=\"date\" value=\"{$date}\" class=\"form-control\" required>
+                    </div>
+                    <button type=\"submit\" name=\"editPayment\" class=\"btn btn-primary\" style=\"float: right;\">Save</button>
+                    </form>
+                </div>
+                <div class=\"modal-footer\">
+                </div>
+                </div>
+            </div>
+            </div>
+            ";
+        }   
+        ?>
     <?php endif; ?>
+    
+
+
+
+
+
+
+
+
     <!-- Inline Add Payment Method Modal (simple) -->
     <div class="card p-3">
         <h6>Add Payment Method (quick)</h6>

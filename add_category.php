@@ -178,10 +178,10 @@ if (isset($_GET['delCategory'])) {
                     <label class=\"form-label\">Category Name</label>
                     <input type=\"text\" name=\"name\" value=\"$name\" required class=\"form-control\">
                   </div>
-                  <div class=\"mb-3\">
+                  <!-- div class=\"mb-3\">
                     <label class=\"form-label\">Phone</label>
                     <input type=\"text\" name=\"phone\" value=\"Shop\" class=\"form-control\">
-                  </div>
+                  </div -->
                   <button type=\"submit\" name=\"editCategory\" class=\"btn btn-primary\" style=\"float: right;\">Save</button>
                 </form>
               </div>
